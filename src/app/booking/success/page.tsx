@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { CheckCircle, Calendar, Users, Phone, Mail, MessageCircle, Home, FileText } from 'lucide-react'
+import { CheckCircle, Calendar, Users, Phone, Mail, MessageCircle, Home, FileText, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
