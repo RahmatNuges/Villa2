@@ -10,14 +10,14 @@ import { VillaReviews } from '@/components/villa/villa-reviews'
 import { StructuredData } from '@/components/seo/structured-data'
 
 interface VillaDetailPageProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
-  searchParams: {
+  }>
+  searchParams: Promise<{
     checkIn?: string
     checkOut?: string
     guests?: string
-  }
+  }>
 }
 
 async function getVilla(slug: string) {
@@ -66,8 +66,9 @@ async function getVilla(slug: string) {
   return villa
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const villa = await getVilla(params.slug)
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const resolvedParams = await params
+  const villa = await getVilla(resolvedParams.slug)
   
   if (!villa) {
     return {
@@ -114,7 +115,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 export default async function VillaDetailPage({ params, searchParams }: VillaDetailPageProps) {
-  const villa = await getVilla(params.slug)
+  const resolvedParams = await params
+  const resolvedSearchParams = await searchParams
+  const villa = await getVilla(resolvedParams.slug)
 
   if (!villa) {
     notFound()
