@@ -6,27 +6,50 @@ import { Menu, X, User, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import { isAdmin } from '@/lib/auth'
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [user, setUser] = useState<{ user_metadata?: { role?: string } } | null>(null)
+  const [user, setUser] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
   const router = useRouter()
 
   // Check auth status on mount
   useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
-    }
-    getUser()
+    let mounted = true
 
+    const initializeAuth = async () => {
+      try {
+        // Get initial user
+        const { data: { user }, error } = await supabase.auth.getUser()
+        if (mounted) {
+          setUser(user)
+        }
+      } catch (error) {
+        // Handle error silently
+      } finally {
+        if (mounted) {
+          setLoading(false)
+        }
+      }
+    }
+    
+    initializeAuth()
+
+    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        setUser(session?.user ?? null)
+        if (mounted) {
+          setUser(session?.user ?? null)
+          setLoading(false)
+        }
       }
     )
 
-    return () => subscription.unsubscribe()
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+    }
   }, [])
 
   const handleLogout = async () => {
@@ -71,15 +94,20 @@ export function Header() {
 
           {/* User Menu */}
           <div className="hidden md:flex items-center space-x-4">
-            {user ? (
+            {loading ? (
+              <div className="flex items-center space-x-2">
+                <div className="w-16 h-8 bg-gray-200 animate-pulse rounded"></div>
+                <div className="w-16 h-8 bg-gray-200 animate-pulse rounded"></div>
+              </div>
+            ) : user ? (
               <div className="flex items-center space-x-4">
-                <Link href="/account/bookings">
+                <Link href="/account">
                   <Button variant="ghost" size="sm">
                     <User className="h-4 w-4 mr-2" />
                     Akun Saya
                   </Button>
                 </Link>
-                {user.user_metadata?.role === 'admin' && (
+                {isAdmin(user) && (
                   <Link href="/admin">
                     <Button variant="outline" size="sm">
                       Admin
@@ -138,15 +166,20 @@ export function Header() {
                 </Link>
               ))}
               <div className="pt-4 border-t border-gray-200">
-                {user ? (
+                {loading ? (
                   <div className="space-y-2">
-                    <Link href="/account/bookings">
+                    <div className="w-full h-8 bg-gray-200 animate-pulse rounded"></div>
+                    <div className="w-full h-8 bg-gray-200 animate-pulse rounded"></div>
+                  </div>
+                ) : user ? (
+                  <div className="space-y-2">
+                    <Link href="/account">
                       <Button variant="ghost" size="sm" className="w-full justify-start">
                         <User className="h-4 w-4 mr-2" />
                         Akun Saya
                       </Button>
                     </Link>
-                    {user.user_metadata?.role === 'admin' && (
+                    {isAdmin(user) && (
                       <Link href="/admin">
                         <Button variant="outline" size="sm" className="w-full">
                           Admin

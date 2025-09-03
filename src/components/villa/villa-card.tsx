@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import Image from 'next/image'
 import { MapPin, Users, Bed, Bath, Star } from 'lucide-react'
@@ -24,24 +26,33 @@ interface VillaCardProps {
 }
 
 export function VillaCard({ villa }: VillaCardProps) {
-  const mainImage = villa.images[0] || {
-    url: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800',
+  // Use a fallback image if no images are available
+  const mainImage = villa.images && villa.images.length > 0 ? villa.images[0] : {
+    url: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&h=600&fit=crop&auto=format&q=80&fm=jpg',
     alt: villa.name
   }
 
   return (
     <Card className="group overflow-hidden hover:shadow-xl transition-all duration-300">
-      <div className="relative h-64 overflow-hidden">
+      <div className="relative h-64 overflow-hidden bg-gray-200">
         <Image
           src={mainImage.url}
           alt={mainImage.alt || villa.name}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-300"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          loading="lazy"
+          placeholder="blur"
+          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
+          onError={(e) => {
+            console.error('Image failed to load:', mainImage.url)
+            // Fallback to a different image
+            e.currentTarget.src = 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&h=600&fit=crop&auto=format&q=80&fm=jpg'
+          }}
         />
         {villa.rating_average && (
           <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
-            <Star className="h-3 w-3 fill-[#D4AF37] text-[#D4AF37]" />
+            <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
             <span className="text-xs font-medium">{villa.rating_average.toFixed(1)}</span>
           </div>
         )}
@@ -58,7 +69,7 @@ export function VillaCard({ villa }: VillaCardProps) {
           )}
 
           {/* Villa Name */}
-          <h3 className="font-heading text-xl font-semibold text-[#111827] group-hover:text-[#D4AF37] transition-colors">
+          <h3 className="font-heading text-xl font-semibold text-gray-900 group-hover:text-yellow-600 transition-colors">
             {villa.name}
           </h3>
 
@@ -81,7 +92,7 @@ export function VillaCard({ villa }: VillaCardProps) {
           {/* Price */}
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-2xl font-bold text-[#111827]">
+              <span className="text-2xl font-bold text-gray-900">
                 {formatCurrency(villa.base_price)}
               </span>
               <span className="text-gray-600 text-sm ml-1">/malam</span>

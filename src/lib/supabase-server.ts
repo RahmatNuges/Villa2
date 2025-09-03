@@ -24,6 +24,33 @@ export async function createClient() {
           }
         },
       },
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true
+      }
     }
   )
 }
+
+// Alternative client that doesn't try to set cookies (for reading only)
+export async function createReadOnlyClient() {
+  const cookieStore = await cookies()
+
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll()
+        },
+        setAll() {
+          // Do nothing - read only
+        },
+      },
+    }
+  )
+}
+
+

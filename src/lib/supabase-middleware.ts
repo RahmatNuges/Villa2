@@ -31,16 +31,38 @@ export async function updateSession(request: NextRequest) {
   // supabase.auth.getUser(). A simple mistake could make it very hard to debug
   // issues with users being randomly logged out.
 
+  // Try to get user from session first, then fallback to getUser
   const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    data: { session },
+  } = await supabase.auth.getSession()
+  
+  let user = session?.user
+  
+  // If no user from session, try getUser
+  if (!user) {
+    const {
+      data: { user: userFromGetUser },
+    } = await supabase.auth.getUser()
+    user = userFromGetUser
+  }
 
+  // Check if user is trying to access protected routes
+  const protectedRoutes = ['/admin', '/account']
+  const isProtectedRoute = protectedRoutes.some(route => 
+    request.nextUrl.pathname.startsWith(route)
+  )
+  
+
+  
   if (
     !user &&
     !request.nextUrl.pathname.startsWith('/login') &&
     !request.nextUrl.pathname.startsWith('/register') &&
-    request.nextUrl.pathname.startsWith('/admin')
+    !request.nextUrl.pathname.startsWith('/auth') &&
+    !request.nextUrl.pathname.startsWith('/debug') &&
+    isProtectedRoute
   ) {
+
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone()
     url.pathname = '/login'

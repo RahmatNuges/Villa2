@@ -29,10 +29,10 @@
 
 @layer base {
   * {
-    border-color: rgb(229 231 235);
+    @apply border-gray-200;
   }
   body {
-    @apply bg-[#FAFAF9] text-[#111827];
+    @apply bg-gray-50 text-gray-900;
   }
 }
 
@@ -43,6 +43,50 @@
   
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* Custom date input styling */
+  input[type="date"] {
+    color-scheme: light;
+  }
+  
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    background: transparent;
+    bottom: 0;
+    color: transparent;
+    cursor: pointer;
+    height: auto;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: auto;
+  }
+  
+  input[type="date"]::-webkit-datetime-edit {
+    color: rgb(17 24 39);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+  
+  input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+    color: rgb(17 24 39);
+  }
+  
+  input[type="date"]::-webkit-datetime-edit-text {
+    color: rgb(17 24 39);
+  }
+  
+  input[type="date"]::-webkit-datetime-edit-month-field {
+    color: rgb(17 24 39);
+  }
+  
+  input[type="date"]::-webkit-datetime-edit-day-field {
+    color: rgb(17 24 39);
+  }
+  
+  input[type="date"]::-webkit-datetime-edit-year-field {
+    color: rgb(17 24 39);
   }
 }
 
@@ -71,5 +115,5 @@ html {
 
 /* Focus styles */
 .focus-visible {
-  @apply outline-none ring-2 ring-[#D4AF37] ring-offset-2;
+  @apply outline-none ring-2 ring-yellow-500 ring-offset-2;
 }

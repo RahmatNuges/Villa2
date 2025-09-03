@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { Star, Shield, Heart, Award } from 'lucide-react'
 
 async function getFeaturedVillas() {
+  // First, let's get villas without images to see if the basic data works
   const { data: villas, error } = await supabase
     .from('villas')
     .select(`
@@ -16,11 +17,7 @@ async function getFeaturedVillas() {
       bathrooms,
       max_guests,
       base_price,
-      rating_average,
-      images (
-        url,
-        alt
-      )
+      rating_average
     `)
     .limit(4)
     .order('created_at', { ascending: false })
@@ -30,6 +27,24 @@ async function getFeaturedVillas() {
     return []
   }
 
+  // Now let's get images for each villa
+  if (villas && villas.length > 0) {
+    for (const villa of villas) {
+      const { data: images, error: imagesError } = await supabase
+        .from('images')
+        .select('url, alt')
+        .eq('villa_id', villa.id)
+        .order('order_index', { ascending: true })
+        .limit(1)
+
+      if (imagesError) {
+        console.error('Error fetching images for villa:', villa.id, imagesError)
+        villa.images = []
+      } else {
+        villa.images = images || []
+      }
+    }
+  }
   return villas || []
 }
 
@@ -39,13 +54,13 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-[#111827] via-[#1F2937] to-[#111827] text-white">
+      <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="font-heading text-5xl md:text-6xl font-bold mb-6 text-balance">
               Nikmati Kemewahan
-              <span className="text-[#D4AF37] block">Villa di Bali</span>
+              <span className="text-yellow-500 block">Villa di Bali</span>
             </h1>
             <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
               Pengalaman menginap villa mewah yang tak terlupakan dengan fasilitas lengkap, 
@@ -66,7 +81,7 @@ export default async function HomePage() {
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="font-heading text-3xl font-bold text-[#111827] mb-4">
+            <h2 className="font-heading text-3xl font-bold text-gray-900 mb-4">
               Mengapa Memilih Kami?
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
@@ -76,8 +91,8 @@ export default async function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="text-center">
-              <div className="bg-[#D4AF37]/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Star className="h-8 w-8 text-[#D4AF37]" />
+              <div className="bg-yellow-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Star className="h-8 w-8 text-yellow-600" />
               </div>
               <h3 className="font-semibold text-lg mb-2">Kualitas Premium</h3>
               <p className="text-gray-600 text-sm">
@@ -86,8 +101,8 @@ export default async function HomePage() {
             </div>
 
             <div className="text-center">
-              <div className="bg-[#14B8A6]/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Shield className="h-8 w-8 text-[#14B8A6]" />
+              <div className="bg-teal-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Shield className="h-8 w-8 text-teal-600" />
               </div>
               <h3 className="font-semibold text-lg mb-2">Aman & Terpercaya</h3>
               <p className="text-gray-600 text-sm">
@@ -96,8 +111,8 @@ export default async function HomePage() {
             </div>
 
             <div className="text-center">
-              <div className="bg-[#D4AF37]/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Heart className="h-8 w-8 text-[#D4AF37]" />
+              <div className="bg-yellow-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Heart className="h-8 w-8 text-yellow-600" />
               </div>
               <h3 className="font-semibold text-lg mb-2">Pelayanan Terbaik</h3>
               <p className="text-gray-600 text-sm">
@@ -106,8 +121,8 @@ export default async function HomePage() {
             </div>
 
             <div className="text-center">
-              <div className="bg-[#14B8A6]/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Award className="h-8 w-8 text-[#14B8A6]" />
+              <div className="bg-teal-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Award className="h-8 w-8 text-teal-600" />
               </div>
               <h3 className="font-semibold text-lg mb-2">Terpercaya</h3>
               <p className="text-gray-600 text-sm">
@@ -119,10 +134,10 @@ export default async function HomePage() {
       </section>
 
       {/* Featured Villas Section */}
-      <section className="py-16 bg-[#FAFAF9]">
+      <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="font-heading text-3xl font-bold text-[#111827] mb-4">
+            <h2 className="font-heading text-3xl font-bold text-gray-900 mb-4">
               Villa Unggulan
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
@@ -154,7 +169,7 @@ export default async function HomePage() {
           <div className="text-center mt-12">
             <a
               href="/villas"
-              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-[#D4AF37] hover:bg-[#B8941F] transition-colors"
+              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 transition-colors"
             >
               Lihat Semua Villa
             </a>
@@ -163,7 +178,7 @@ export default async function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-[#111827] text-white">
+      <section className="py-16 bg-gray-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="font-heading text-3xl font-bold mb-4">
             Siap untuk Pengalaman Tak Terlupakan?
@@ -174,13 +189,13 @@ export default async function HomePage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="/villas"
-              className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-[#111827] bg-[#D4AF37] hover:bg-[#B8941F] transition-colors"
+              className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-gray-900 bg-yellow-500 hover:bg-yellow-600 transition-colors"
             >
               Cari Villa
             </a>
             <a
               href="/contact"
-              className="inline-flex items-center px-8 py-3 border border-[#D4AF37] text-base font-medium rounded-md text-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#111827] transition-colors"
+              className="inline-flex items-center px-8 py-3 border border-yellow-500 text-base font-medium rounded-md text-yellow-500 hover:bg-yellow-500 hover:text-gray-900 transition-colors"
             >
               Hubungi Kami
             </a>
