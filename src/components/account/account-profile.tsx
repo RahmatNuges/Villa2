@@ -9,7 +9,7 @@ import { supabase } from '@/lib/supabase'
 interface AccountProfileProps {
   user: {
     id: string
-    email: string
+    email?: string
     user_metadata?: {
       name?: string
       role?: string
@@ -24,7 +24,7 @@ export function AccountProfile({ user }: AccountProfileProps) {
   const [message, setMessage] = useState('')
   const [formData, setFormData] = useState({
     name: user.user_metadata?.name || '',
-    email: user.email,
+    email: user.email || '',
   })
 
   const handleInputChange = (key: string, value: string) => {
@@ -58,7 +58,7 @@ export function AccountProfile({ user }: AccountProfileProps) {
   const handleCancel = () => {
     setFormData({
       name: user.user_metadata?.name || '',
-      email: user.email,
+      email: user.email || '',
     })
     setIsEditing(false)
     setMessage('')
