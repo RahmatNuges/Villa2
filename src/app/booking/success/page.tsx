@@ -1,5 +1,6 @@
 'use client'
 
+// Force update for Vercel deployment
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { CheckCircle, Calendar, Users, Phone, Mail, MessageCircle, Home, FileText, User } from 'lucide-react'
